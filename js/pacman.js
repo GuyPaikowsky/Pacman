@@ -2,6 +2,7 @@
 
 const PACMAN = '😀'
 var gPacman
+var gIsPowerUp = false
 
 function createPacman(board) {
     gPacman = {
@@ -25,14 +26,33 @@ function onMovePacman(ev) {
     console.log('nextCell:', nextCell)
     // return if cannot move
     if (nextCell === WALL) return
-    // hitting a ghost? call gameOver
-    if (nextCell === GHOST) {
-        gameOver()
-        return
-    }
+
     if (nextCell === FOOD) {
         updateScore(1)
     }
+
+    if (nextCell === CHERRY) {
+        updateScore(10)
+        gCherryCount++
+    }
+
+    if (nextCell === POWERUP) {
+        gIsPowerUp = true
+        toggleGhostPowerup(nextCell)
+        setTimeout(function() {
+            gIsPowerUp = false
+            toggleGhostPowerup()
+        }, 5000)
+    }
+
+    if (nextCell === GHOST && !gIsPowerUp) {
+        gameOver()
+        return
+    } else if (nextCell === GHOST && gIsPowerUp) {
+        var ghost = getGhostAtLocation(nextLocation)
+        removeGhost(ghost)
+    }
+
     // moving from current location:
     // update the model
     gBoard[gPacman.location.i][gPacman.location.j] = EMPTY

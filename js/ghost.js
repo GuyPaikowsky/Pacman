@@ -1,21 +1,31 @@
 'use strict'
 
+
+//div {
+//   color: transparent;
+//   text-shadow: 0 0 0 red;
+// }
+
+
 const GHOST = '👻'
 var gGhosts
-
+var gGhostColors = []
 var gIntervalGhosts
+
+
 
 function createGhost(board) {
     var ghost = {
         id: makeId(),
         location: {
             i: 3,
-            j: 3
+            j: 3,
         },
-        currCellContent: FOOD
+        currCellContent: FOOD,
+        color: getRandomColor()
     }
     gGhosts.push(ghost)
-    board[ghost.location.i][ghost.location.j] = GHOST
+    board[ghost.location.i][ghost.location.j] = getGhostHTML(ghost)
 }
 
 function createGhosts(board) {
@@ -54,8 +64,8 @@ function moveGhost(ghost) {
     // return if cannot move
     if (nextCell === WALL) return
     if (nextCell === GHOST) return
-    // hitting a pacman? call gameOver
-    if (nextCell === PACMAN) {
+    // hitting a pacman? call gameOver unless power-up active
+    if (nextCell === PACMAN && !gIsPowerUp) {
         gameOver()
         return
     }
@@ -88,5 +98,57 @@ function getMoveDiff() {
 }
 
 function getGhostHTML(ghost) {
-    return `<span>${GHOST}</span>`
+    var ghostColor = ghost.color
+    return `<span style="color: transparent; text-shadow: 0 4px ${ghostColor}">${GHOST}</span>`
+}
+
+function toggleGhostPowerup(ghost) {
+    // change the colors to blue
+    if (!gIsPowerUp) {
+        for (var i = 0; i < gGhosts.length; i++) {
+            gGhosts[i].color = gGhostColors[i]
+        }
+
+    } else {
+        // TODO: Change the colors back to the original ones...
+        // TODO: Make a more efficient way to store the ghost colors...
+        for (var i = 0; i < gGhosts.length; i++) {
+            gGhostColors.push(gGhosts[i].color)
+            gGhosts[i].color = 'blue'
+            // renderCell(gGhosts.location, gGhosts[i])
+        }
+    }
+}
+
+
+function getGhostAtLocation(location) {
+    for (var i = 0; i < gGhosts.length; i++) {
+        if (gGhosts[i].location.i === location.i &&
+            gGhosts[i].location.j === location.j) {
+            return gGhosts[i]
+        }
+    }
+    return -1
+}
+
+function removeGhost(ghost) {
+    for (var i = 0; i < gGhosts.length; i++) {
+        if (gGhosts[i].id === ghost.id) {
+            if (ghost.currCellContent === FOOD) {
+                updateScore(1)
+            }
+            gBoard[ghost.location.i][ghost.location.j] = EMPTY
+            renderCell(ghost.location, EMPTY)
+
+            // remove ghost from ghosts array and store in a temporary place...
+            const ghostDead = gGhosts.splice(i, 1)
+            gGhosts.splice(i, 1)
+
+            setTimeout(function() {
+                gGhosts.push(ghostDead)
+            }, 5000)
+
+            break
+        }
+    }
 }

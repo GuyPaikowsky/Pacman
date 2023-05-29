@@ -2,6 +2,8 @@
 
 const WALL = '#'
 const FOOD = '.'
+const CHERRY = '🍒'
+const POWERUP = '💩' //"power food"
 const EMPTY = ' '
 
 const gGame = {
@@ -9,7 +11,7 @@ const gGame = {
     isOn: false
 }
 var gBoard
-
+var gCherryCount = 0
 
 function onInit() {
     console.log('hello')
@@ -17,9 +19,15 @@ function onInit() {
     gBoard = buildBoard()
     createPacman(gBoard)
     createGhosts(gBoard)
-
+    setInterval(addRandomCherry, 15000)
     renderBoard(gBoard)
     gGame.isOn = true
+
+    // Hide modal if it is displayed from a previous game
+    var elModal = document.querySelector('.modal')
+    elModal.style.display = 'none'
+    // remove the last game's high score
+    updateScore(0)
 }
 
 function buildBoard() {
@@ -36,6 +44,13 @@ function buildBoard() {
                 j === 0 || j === size - 1 ||
                 (j === 3 && i > 4 && i < size - 2)) {
                 board[i][j] = WALL
+            }
+            // place powerups at corners...
+            if (i === 1 && j === size - 2 ||
+                j === 1 && i === size - 2 ||
+                i === 1 && j === 1        ||
+                i === size - 2 && j === size - 2) {
+                board[i][j] = POWERUP
             }
         }
     }
@@ -71,7 +86,15 @@ function updateScore(diff) {
     // update model and dom
     gGame.score += diff
     document.querySelector('h2 span').innerText = gGame.score
+
+    // Each cherry amounts to 10 points and 1 point lost to
+    // the food token lost.
+    var foodScore = gGame.score - (gCherryCount * 11)
+    if (foodScore === 60) {
+        gameOver()
+    }
 }
+
 
 function gameOver() {
     console.log('Game Over')
@@ -79,4 +102,29 @@ function gameOver() {
     clearInterval(gIntervalGhosts)
     renderCell(gPacman.location, EMPTY)
 
+    // prepare contents of modal to show the result of the game
+    var userMessage = document.querySelector('.user-msg')
+    userMessage.innerText = (gGame.score === 60) ? 'You Won!' : 'You Lost!'
+
+    // Show modal and allow the option to restart
+    var elModal = document.querySelector('.modal')
+    elModal.style.display = 'block'
+
+    gGame.score = 0
+}
+
+function addRandomCherry() {
+    var emptyCells = []
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard.length; j++) {
+            if (gBoard[i][j] === FOOD || gBoard[i][j] === null) {
+                emptyCells.push({i: i, j: j})
+            }
+        }
+    }
+    // console.log(emptyCells)
+    var randomCell = emptyCells[getRandomIntInclusive(0, emptyCells.length - 1)]
+    gBoard[randomCell.i][randomCell.j] = CHERRY
+
+    renderCell(randomCell, CHERRY)
 }
