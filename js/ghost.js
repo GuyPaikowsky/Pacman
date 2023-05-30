@@ -1,17 +1,9 @@
 'use strict'
 
-
-//div {
-//   color: transparent;
-//   text-shadow: 0 0 0 red;
-// }
-
-
 const GHOST = '👻'
 var gGhosts
 var gGhostColors = []
 var gIntervalGhosts
-
 
 
 function createGhost(board) {
@@ -108,16 +100,16 @@ function toggleGhostPowerup(ghost) {
         for (var i = 0; i < gGhosts.length; i++) {
             gGhosts[i].color = gGhostColors[i]
         }
-
+        gGhostColors = []
     } else {
-        // TODO: Change the colors back to the original ones...
-        // TODO: Make a more efficient way to store the ghost colors...
         for (var i = 0; i < gGhosts.length; i++) {
-            gGhostColors.push(gGhosts[i].color)
+            if (!gGhostColors[i]) {
+                gGhostColors[i] = gGhosts[i].color
+            }
             gGhosts[i].color = 'blue'
-            // renderCell(gGhosts.location, gGhosts[i])
         }
     }
+    renderGhosts()
 }
 
 
@@ -141,14 +133,21 @@ function removeGhost(ghost) {
             renderCell(ghost.location, EMPTY)
 
             // remove ghost from ghosts array and store in a temporary place...
-            const ghostDead = gGhosts.splice(i, 1)
-            gGhosts.splice(i, 1)
+            var ghostDead = (gGhosts.splice(i, 1))
 
             setTimeout(function() {
-                gGhosts.push(ghostDead)
+                ghostDead.location = {i: 3, j: 3}
+                ghostDead.color = gGhostColors.color
+                gGhosts.push(ghostDead[0])
             }, 5000)
-
             break
         }
+    }
+}
+
+function renderGhosts() {
+    for (var i = 0; i < gGhosts.length; i++) {
+        var ghost = gGhosts[i]
+        renderCell(ghost.location, getGhostHTML(ghost))
     }
 }

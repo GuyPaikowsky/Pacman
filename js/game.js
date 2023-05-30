@@ -128,3 +128,18 @@ function addRandomCherry() {
 
     renderCell(randomCell, CHERRY)
 }
+
+
+// function findEmptyCells() {
+//     var emptyCells = []
+//     for (var i = 0; i < gBoard.length; i++) {
+//         for (var j = 0; j < gBoard.length; j++) {
+//             if (gBoard[i][j] === FOOD || gBoard[i][j] === null) {
+//                 emptyCells.push({i: i, j: j})
+//             }
+//         }
+//     }
+//     var randomCell = emptyCells[getRandomIntInclusive(0, emptyCells.length - 1)]
+//
+//     return randomCell
+// }
